@@ -6,8 +6,8 @@ import { attachCartId } from "../middleware/cart-session.js";
 const router = express.Router();
 
 router.post("/add", attachCartId, protectOptional, addToCart);
-router.get("/", attachCartId, protectOptional, getCart);
-router.delete("/remove/:itemId", attachCartId, protectOptional, removeFromCart);
-router.delete("/reset", attachCartId, protectOptional, resetCart);
+router.get("/", protectOptional, getCart);
+router.delete("/remove/:itemId", protectOptional, removeFromCart);
+router.delete("/reset", protectOptional, resetCart);
 
 export default router;
