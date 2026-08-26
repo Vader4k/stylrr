@@ -16,7 +16,7 @@ axiosInstance.interceptors.request.use(
         // Only prefix on the client and if it's a relative path starting with /
         if (typeof window !== "undefined" && config.url?.startsWith("/") && !config.url.startsWith("/api")) {
             // We don't use baseURL on the client anymore to avoid Axios path replacement issues
-            config.baseURL = ""; 
+            config.baseURL = "";
             config.url = `/api${config.url}`;
         }
         return config;
@@ -50,18 +50,18 @@ axiosRetry(axiosInstance, {
     shouldResetTimeout: true, // Reset timeout on each retry
 });
 
-// axiosInstance.interceptors.response.use(
-//     (response) => response,
-//     (error) => {
-//         const isLoginRequest = error.config?.url?.includes("/login");
-        
-//         if (error.response?.status === 401 && !isLoginRequest) {
-//             if (typeof window !== "undefined") {
-//                 window.location.href = "/login";
-//             }
-//         }
-//         return Promise.reject(error);
-//     }
-// );
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const isLoginRequest = error.config?.url?.includes("/login");
+
+        if (error.response?.status === 401 && !isLoginRequest) {
+            if (typeof window !== "undefined") {
+                window.location.href = "/login";
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default axiosInstance
