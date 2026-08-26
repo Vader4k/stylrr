@@ -3,6 +3,7 @@ import { hashPassword, comparePassword } from "../utils/utils.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/mail.js";
 import { welcomeEmail } from "../emails/welcome.js";
+import { Cart } from "../models/cart.model.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -83,6 +84,42 @@ export const loginUser = async (req, res) => {
     const isPasswordValid = await comparePassword(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "invalid credentials" });
+    }
+
+    // merge guest cart if it exists
+    if (req.cookies.cartId) {
+      const guestCartId = req.cookies.cartId;
+      const guestCart = await Cart.findOne({ cartId: guestCartId });
+
+      if (guestCart) {
+        const userCart = await Cart.findOne({ user: user._id });
+
+        if (userCart) {
+          // Merge guest cart items into user cart
+          guestCart.items.forEach(guestItem => {
+            const existingItem = userCart.items.find(item =>
+              item.sku === guestItem.sku &&
+              item.product.toString() === guestItem.product.toString() &&
+              item.size === guestItem.size &&
+              (item.color || null) === (guestItem.color || null)
+            );
+
+            if (existingItem) {
+              existingItem.quantity += guestItem.quantity;
+            } else {
+              userCart.items.push(guestItem);
+            }
+          });
+          await userCart.save();
+          await Cart.deleteOne({ _id: guestCart._id });
+        } else {
+          // Convert guest cart to user cart
+          guestCart.user = user._id;
+          guestCart.cartId = null; // Important: remove cartId so it doesn't violate unique index on guest carts
+          await guestCart.save();
+        }
+        res.clearCookie("cartId");
+      }
     }
 
     //generate token
