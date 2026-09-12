@@ -155,7 +155,17 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
-    res.clearCookie("token");
+    const isSecure =
+      process.env.NODE_ENV === "production" ||
+      req.secure ||
+      req.get("x-forwarded-proto") === "https";
+    // Mirror the options used in loginUser so the cookie is actually removed.
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      path: "/",
+    });
     res.status(200).json({ message: "user logged out successfully" });
   } catch (error) {
     console.log(error);

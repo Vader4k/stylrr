@@ -34,7 +34,7 @@ export default function UserLoginForm() {
       toast.success(response.message);
       // Force Next.js to re-run middleware with the fresh auth cookie
       router.refresh();
-      router.push("/account");
+      router.replace("/account");
     } catch (error) {
       toast.error(errorHandler(error));
     }

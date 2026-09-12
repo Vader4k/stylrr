@@ -11,7 +11,8 @@ const AccountAuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!isLoading && !data) {
-      router.push("/account/login")
+      // replace (not push) so a stale token doesn't build a back-button loop
+      router.replace("/account/login")
     }
   }, [data, isLoading, router])
 

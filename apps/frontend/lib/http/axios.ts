@@ -53,11 +53,43 @@ axiosRetry(axiosInstance, {
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        const isLoginRequest = error.config?.url?.includes("/login");
+        if (error.response?.status === 401 && typeof window !== "undefined") {
+            const url: string = error.config?.url ?? "";
+            // Never hijack the session probe or auth endpoints themselves.
+            // useMe() intentionally returns null on 401 so public pages and
+            // guards can render gracefully instead of hard-reloading.
+            const isAuthEndpoint =
+                url.includes("/auth/me") ||
+                url.includes("/auth/login") ||
+                url.includes("/auth/register") ||
+                url.includes("/auth/logout");
+            if (isAuthEndpoint) {
+                return Promise.reject(error);
+            }
 
-        if (error.response?.status === 401 && !isLoginRequest) {
-            if (typeof window !== "undefined") {
-                window.location.href = "/login";
+            const pathname = window.location.pathname;
+            // Already on an auth page -> don't reload, the forms handle it.
+            const isOnAuthPage =
+                pathname === "/login" ||
+                pathname.startsWith("/account/login") ||
+                pathname.startsWith("/account/register");
+            if (isOnAuthPage) {
+                return Promise.reject(error);
+            }
+
+            // Only bounce when the user is actually on a protected route.
+            // Public pages (/, /shop, /product/...) call useMe() via the
+            // Navbar and must not redirect guests to login on 401.
+            const isProtectedRoute =
+                pathname.startsWith("/admin") || pathname.startsWith("/account");
+            if (!isProtectedRoute) {
+                return Promise.reject(error);
+            }
+
+            const target = pathname.startsWith("/admin") ? "/login" : "/account/login";
+            // Guard against redirect loops (e.g. stale token repeatedly 401ing).
+            if (pathname !== target) {
+                window.location.href = target;
             }
         }
         return Promise.reject(error);

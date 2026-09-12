@@ -12,9 +12,6 @@ export function middleware(request: NextRequest) {
         !pathname.startsWith('/account/login') &&
         !pathname.startsWith('/account/register')
 
-    //paths for guest users (login/register)
-    const isAuthPath = pathname === '/account/login' || pathname === '/account/register'
-
     if (isAdminPath && !token) {
         //user is on admin dashboard but not logged in -> redirect to admin login
         return NextResponse.redirect(new URL('/login', request.url))
@@ -25,10 +22,12 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/account/login', request.url))
     }
 
-    if (isAuthPath && token) {
-        //user is on login/register page but is logged in -> redirect to dashboard
-        return NextResponse.redirect(new URL('/account', request.url))
-    }
+    // NOTE: intentionally no "logged-in user on /account/login -> /account"
+    // redirect here. Middleware can only check cookie *existence*, not validity
+    // (expired/invalid JWT, deleted or suspended user). Redirecting on existence
+    // alone ping-pongs with AccountAuthGuard when the token is stale:
+    // middleware pushes to /account, guard pushes back to /account/login.
+    // Auth validity is resolved client-side via useMe() + server 401 handling.
 
     return NextResponse.next()
 }

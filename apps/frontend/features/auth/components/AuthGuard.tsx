@@ -12,11 +12,12 @@ const AdminAuthGuard = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!isLoading) {
       if (!data) {
-        // If not logged in at all, redirect to main login
-        router.push("/login")
+        // If not logged in at all (or stale/invalid token cleared by the
+        // API), redirect to main login. replace avoids history-stack loops.
+        router.replace("/login")
       } else if (data.role !== "admin") {
         // If logged in but not an admin, redirect to account login
-        router.push("/account/login")
+        router.replace("/account/login")
       }
     }
   }, [data, isLoading, router])
