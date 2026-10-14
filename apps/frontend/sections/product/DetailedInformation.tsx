@@ -84,12 +84,12 @@ const DetailedInformation = ({ product }: { product: Product }) => {
       </div>
 
       <div>
-        {product.discount ? (
+        {product.discountPrice && product.discountPrice < product.price ? (
           <div className="flex items-center gap-2">
             <p className="text-xl font-medium line-through text-gray-300">
               {formatPrice(product.price)}
             </p>
-            <p className="text-xl font-medium">{formatPrice(product.discountPrice || product.price)}</p>
+            <p className="text-xl font-medium">{formatPrice(product.discountPrice)}</p>
           </div>
         ) : (
           <p className="text-xl font-medium">{formatPrice(product.price)}</p>

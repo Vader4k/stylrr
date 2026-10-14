@@ -25,7 +25,7 @@ export interface BaseProduct {
     sku: string;
     price: number;
     discountPrice?: number;
-    discount?: number;
+    discountPercentage?: number;
     images: string[];
     isBestSeller: boolean;
     shortDescription: string;
@@ -40,7 +40,7 @@ export interface BaseProduct {
 
 /** Props for ProductCard and other lightweight UI components */
 export interface ProductCardProps extends Pick<BaseProduct, 
-    '_id' | 'name' | 'price' | 'images' | 'discountPrice' | 'discount' | 'isBestSeller' | 'slug' | 'shortDescription'
+    '_id' | 'name' | 'price' | 'images' | 'discountPrice' | 'discountPercentage' | 'isBestSeller' | 'slug' | 'shortDescription'
 > {
     reviews: number;
     inventory?: InventoryItem[];

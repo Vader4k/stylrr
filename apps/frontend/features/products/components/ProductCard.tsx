@@ -7,7 +7,7 @@ import ProductActions from "./ProductActions"
 import { ProductPrice } from "@/features/currency/components/ProductPrice"
 
 
-const ProductCard = ({ name, _id, price, images, reviews, discountPrice, discount, inventory, sold, slug, showRange, isShopPage }: ProductCardProps) => {
+const ProductCard = ({ name, _id, price, images, reviews, discountPrice, discountPercentage, inventory, sold, slug, showRange, isShopPage }: ProductCardProps) => {
   return (
     <div className={`w-full h-100 sm:h-120 lg:h-200 xl:h-140 flex flex-col justify-between gap-2 relative group ${isShopPage ? 'xl:h-100!' : ''}`}>
       <a href={`/product/${slug}`} className="w-full h-[85%] xl:h-[85%]">
@@ -16,11 +16,11 @@ const ProductCard = ({ name, _id, price, images, reviews, discountPrice, discoun
           {images[1] && <Image src={images[1]} alt={name} fill className="object-cover object-top absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:z-2" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />}
         </div>
       </a>
-      {discount && (
+      {discountPercentage ? (
         <div className="absolute top-2 z-5 left-2 bg-white text-xs text-green-600 font-medium font-jost px-2.5 py-1 rounded">
-          {discount}%
+          {discountPercentage}%
         </div>
-      )}
+      ) : null}
       <p className="font-jost capitalize text-xs sm:text-base line-clamp-1">{name}</p>
       <div className="text-sm">
         {discountPrice ? (
