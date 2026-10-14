@@ -44,8 +44,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: "https://stylrr.vercel.app",
+  // canonicals are set per page; a root canonical would be inherited by every route
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   openGraph: {
     type: "website",

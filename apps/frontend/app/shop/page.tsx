@@ -9,9 +9,18 @@ import Pagination from "@/features/products/components/Pagination";
 import EmptyShopView from "@/features/products/components/EmptyShopView";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Shop All Collections",
-  description: "Browse our extensive collection of fashion and accessories. Filter by category, price, color, and size to find your perfect fit.",
+export async function generateMetadata({ searchParams }: PageProp): Promise<Metadata> {
+  const { page } = await searchParams
+  const pageNumber = Number(page) || 1
+
+  return {
+    title: "Shop All Collections",
+    description: "Browse our extensive collection of fashion and accessories. Filter by category, price, color, and size to find your perfect fit.",
+    // filter and sort params collapse to the base listing; pagination keeps its own URL
+    alternates: {
+      canonical: pageNumber > 1 ? `/shop?page=${pageNumber}` : "/shop",
+    },
+  }
 }
 
 const page = async ({ searchParams }: PageProp) => {
