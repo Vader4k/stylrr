@@ -7,6 +7,7 @@ import { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Contact Us",
   description: "Get in touch with the Stylr team. We're here to help with your orders, styling questions, and feedback.",
+  alternates: { canonical: "/contact" },
 }
 
 const page = () => {
