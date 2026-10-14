@@ -4,6 +4,7 @@ import { Cart } from "../models/cart.model.js";
 import { initializeTransaction, verifySignature, verifyTransaction } from "../utils/paystack.js";
 import { sendEmail } from "../utils/mail.js";
 import { orderConfirmationEmail } from "../emails/orderConfirmation.js";
+import { PRODUCTS_TAG, productTag, revalidateStorefront } from "../utils/revalidate.js";
 
 export const checkout = async (req, res) => {
     try {
@@ -165,9 +166,11 @@ export const verifyOrder = async (req, res) => {
                 await order.save();
 
                 // Reduce Stock
+                const stockSlugs = [];
                 for (const item of order.items) {
                     const product = await Product.findById(item.product);
                     if (product) {
+                        stockSlugs.push(product.slug);
                         const invIndex = product.inventory.findIndex(i => i.size === item.size);
                         if (invIndex !== -1) {
                             const availableQty = product.inventory[invIndex].quantity;
@@ -187,6 +190,8 @@ export const verifyOrder = async (req, res) => {
                         }
                     }
                 }
+
+                revalidateStorefront([PRODUCTS_TAG, ...stockSlugs.map(productTag)]);
 
                 // Clear Cart
                 if (order.user) {
@@ -253,9 +258,11 @@ export const paystackWebhook = async (req, res) => {
             await order.save();
 
             // 2. Reduce Stock
+            const stockSlugs = [];
             for (const item of order.items) {
                 const product = await Product.findById(item.product);
                 if (product) {
+                    stockSlugs.push(product.slug);
                     const invIndex = product.inventory.findIndex(i => i.size === item.size);
                     if (invIndex !== -1) {
                         const availableQty = product.inventory[invIndex].quantity;
@@ -275,6 +282,8 @@ export const paystackWebhook = async (req, res) => {
                     }
                 }
             }
+
+            revalidateStorefront([PRODUCTS_TAG, ...stockSlugs.map(productTag)]);
 
             // 3. Clear Cart
             if (order.user) {

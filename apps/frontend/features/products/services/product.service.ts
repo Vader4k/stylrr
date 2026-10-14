@@ -5,6 +5,7 @@ import { processUrlVariables } from "@/lib/utils";
 import { ProductSchemaType } from "../schema/productSchema";
 import { ToFormData } from "../utils/product.utils";
 import { fetcher } from "@/lib/http/fetch";
+import { PRODUCTS_TAG, productTag } from "../utils/cache-tags";
 
 
 export const adminProductServices = {
@@ -54,21 +55,24 @@ export const productServices = {
     getAll: async (filters: ProductFilters): Promise<PublicProductResponse> => {
         return await fetcher.get<PublicProductResponse>(QUERIES.public.products.GET_ALL, {
             params: { ...filters },
-            next: { revalidate: 3600 } // Example: revalidate every hour
+            next: { revalidate: 3600, tags: [PRODUCTS_TAG] }
         });
     },
 
     // get product by slug
     getBySlug: async (slug: string): Promise<Product | undefined> => {
         const url = processUrlVariables(QUERIES.public.products.GET_BY_SLUG, { slug });
-        const data = await fetcher.get<{ product: Product }>(url);
+        // cached until the backend revalidates this product's tag; the hour is a fallback
+        const data = await fetcher.get<{ product: Product }>(url, {
+            next: { revalidate: 3600, tags: [PRODUCTS_TAG, productTag(slug)] }
+        });
         return data.product;
     },
 
     getByCategory: async (category: string): Promise<Product[]> => {
         const url = processUrlVariables(QUERIES.public.products.GET_BY_CATEGORY, { category });
         const data = await fetcher.get<{ products: Product[] }>(url, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600, tags: [PRODUCTS_TAG] }
         });
         return data.products;
     },
@@ -84,7 +88,9 @@ export const productServices = {
 
     //get best seller products
     getBestSeller: async (): Promise<Product[]> => {
-        const data = await fetcher.get<{ products: Product[] }>(QUERIES.public.products.GET_BEST_SELLER);
+        const data = await fetcher.get<{ products: Product[] }>(QUERIES.public.products.GET_BEST_SELLER, {
+            next: { revalidate: 3600, tags: [PRODUCTS_TAG] }
+        });
         return data.products;
     },
 
@@ -92,7 +98,7 @@ export const productServices = {
     getRelated: async (id: string): Promise<Product[]> => {
         const url = processUrlVariables(QUERIES.public.products.GET_RELATED, { id });
         const data = await fetcher.get<{ products: Product[] }>(url, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600, tags: [PRODUCTS_TAG] }
         });
         return data.products;
     },
