@@ -8,14 +8,16 @@ import RelatedProducts from "@/sections/product/RelatedProducts"
 import RecentlyViewedTracker from "@/features/recently-viewed/services/recently-viewed-tracker"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const product = await productServices.getBySlug(slug).catch(() => undefined)
 
-  // metadata blocks the response for crawlers, so this sends a real 404 despite loading.tsx streaming
   if (!product) {
-    notFound()
+    return {
+      title: "Product Not Found",
+    }
   }
 
   return {
@@ -50,11 +52,10 @@ const ProductPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
   const { slug } = await params
   const product = await productServices.getBySlug(slug).catch(() => undefined)
 
+  // resolve the product before anything streams, so a missing slug gets a real 404 status
   if (!product) {
     notFound()
   }
-
-  const relatedProducts = await productServices.getRelated(product._id)
 
   return (
     <main className='w-full max-w-7xl mx-auto px-3 sm:px-10 lg:px-14 xl:px-5'>
@@ -83,10 +84,22 @@ const ProductPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
       </div>
 
       {/* related products */}
-      {relatedProducts.length > 0 && <div className="my-14">
-        <RelatedProducts products={relatedProducts} />
-      </div>}
+      <Suspense fallback={null}>
+        <RelatedSection productId={product._id} />
+      </Suspense>
     </main>
+  )
+}
+
+const RelatedSection = async ({ productId }: { productId: string }) => {
+  const relatedProducts = await productServices.getRelated(productId)
+
+  if (relatedProducts.length === 0) return null
+
+  return (
+    <div className="my-14">
+      <RelatedProducts products={relatedProducts} />
+    </div>
   )
 }
 
