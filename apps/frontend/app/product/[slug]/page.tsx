@@ -13,10 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const product = await productServices.getBySlug(slug).catch(() => undefined)
 
+  // metadata blocks the response for crawlers, so this sends a real 404 despite loading.tsx streaming
   if (!product) {
-    return {
-      title: "Product Not Found",
-    }
+    notFound()
   }
 
   return {
