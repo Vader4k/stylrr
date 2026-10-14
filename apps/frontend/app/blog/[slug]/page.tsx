@@ -36,11 +36,12 @@ const BlogDetails = async ({
   params: Promise<{ slug: string }>;
 }) => {
   const { slug } = await params;
-  const blogPost = await blogService.getBySlug(slug);
-
-  const popularPosts = await blogService.getPopularPosts();
-  const categories = await blogService.getCategories();
-  const tags = await blogService.getTags();
+  const [blogPost, popularPosts, categories, tags] = await Promise.all([
+    blogService.getBySlug(slug),
+    blogService.getPopularPosts(),
+    blogService.getCategories(),
+    blogService.getTags(),
+  ]);
 
   return (
     <main className="w-full max-w-7xl mx-auto lg:my-14 my-10 flex flex-col lg:flex-row justify-between gap-8 xl:gap-14 relative px-3 md:px-14 lg:px-8 xl:px-3">

@@ -26,9 +26,11 @@ export async function generateMetadata({ searchParams }: PageProp): Promise<Meta
 const page = async ({ searchParams }: PageProp) => {
   const resolvedSearchParams = await searchParams;
   const filters = normalizeParams(resolvedSearchParams);
-  const products = await productServices.getAll(filters);
-
-  const categories = await categoriesService.getAllCategoriesPublic();
+  // independent requests, so fetch them together instead of one after the other
+  const [products, categories] = await Promise.all([
+    productServices.getAll(filters),
+    categoriesService.getAllCategoriesPublic(),
+  ]);
 
   const totalPages = products.pagination.totalPages;
   const currentPage = Number(resolvedSearchParams.page) || 1;
