@@ -2,6 +2,7 @@ import { Product } from "../models/product.model.js";
 import { Category, Tag } from "../models/category.model.js";
 import { deleteFromCloudinary, uploadFromBuffer } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
+import { PRODUCTS_TAG, productTag, revalidateStorefront } from "../utils/revalidate.js";
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -338,6 +339,7 @@ export const addProduct = async (req, res) => {
     });
 
     await product.save();
+    revalidateStorefront([PRODUCTS_TAG]);
     res.status(201).json({
       success: true,
       message: "Product added successfully",
@@ -429,6 +431,13 @@ export const updateProduct = async (req, res) => {
       { new: true },
     );
 
+    // old slug too, in case this update renamed it
+    revalidateStorefront([
+      PRODUCTS_TAG,
+      productTag(product.slug),
+      productTag(updatedProduct.slug),
+    ]);
+
     res.status(200).json({
       success: true,
       message: "Product updated successfully",
@@ -457,6 +466,7 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
+    revalidateStorefront([PRODUCTS_TAG, productTag(product.slug)]);
 
     res.status(200).json({
       success: true,

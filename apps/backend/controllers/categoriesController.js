@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
-import { Category } from "../models/category.model.js";
+import { Category, Tag } from "../models/category.model.js";
+import { Product } from "../models/product.model.js";
+import { CATEGORIES_TAG, PRODUCTS_TAG, revalidateStorefront } from "../utils/revalidate.js";
 
 export const getAllCategories = async (req, res) => {
     try {
@@ -141,6 +143,7 @@ export const addCategory = async (req, res) => {
         }
 
         const category = await Category.create({ name, slug, description, isActive, tags: tagIds });
+        revalidateStorefront([CATEGORIES_TAG]);
         res.status(201).json({
             success: true,
             message: "Category added successfully",
@@ -176,6 +179,8 @@ export const updateCategory = async (req, res) => {
         }
 
         const category = await Category.findByIdAndUpdate(req.params.id, { name, slug, description, isActive, tags: tagIds }, { new: true });
+        // product pages and listings show category names, so refresh product data too
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
             message: "Category updated successfully",
@@ -189,6 +194,7 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
             message: "Category deleted successfully",
@@ -199,13 +205,26 @@ export const deleteCategory = async (req, res) => {
     }
 }
 
+// DELETE /categories/tags/:id — :id is a tag id. Tags are shared documents,
+// so remove every reference before deleting the tag itself.
 export const deleteCategoryTags = async (req, res) => {
     try {
-        const category = await Category.findByIdAndDelete(req.params.id);
+        const tag = await Tag.findById(req.params.id);
+        if (!tag) {
+            return res.status(404).json({ success: false, message: "Tag not found" });
+        }
+
+        await Promise.all([
+            Category.updateMany({ tags: tag._id }, { $pull: { tags: tag._id } }),
+            Product.updateMany({ tags: tag._id }, { $pull: { tags: tag._id } }),
+        ]);
+        await Tag.findByIdAndDelete(tag._id);
+
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
-            message: "Category deleted successfully",
-            category
+            message: "Tag deleted successfully",
+            tag
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

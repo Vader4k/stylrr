@@ -19,11 +19,13 @@ const BlogPage = async({ searchParams }: BlogPageProps) => {
     page: resolvedParams.page ? Number(resolvedParams.page) : 1,
   };
 
-  const blogResponse = await blogService.getAll(filters)
+  const [blogResponse, popularPosts, categories, tags] = await Promise.all([
+    blogService.getAll(filters),
+    blogService.getPopularPosts(),
+    blogService.getCategories(),
+    blogService.getTags(),
+  ])
   const blogPosts = blogResponse.blogs;
-  const popularPosts = await blogService.getPopularPosts()
-  const categories = await blogService.getCategories()
-  const tags = await blogService.getTags()
 
 
   return (
