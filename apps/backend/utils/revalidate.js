@@ -1,6 +1,7 @@
 // Tells the Next.js storefront to drop cached data for the given tags.
 // Tag names must match apps/frontend/features/products/utils/cache-tags.ts.
 export const PRODUCTS_TAG = "products";
+export const CATEGORIES_TAG = "categories";
 
 export const productTag = (slug) => `product:${slug}`;
 

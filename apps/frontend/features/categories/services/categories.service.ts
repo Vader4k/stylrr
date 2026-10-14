@@ -4,6 +4,7 @@ import { CategorySchemaType } from "../schema/categorySchema";
 import { Category } from "../types/categories.types";
 import { processUrlVariables } from "@/lib/utils";
 import { fetcher } from "@/lib/http/fetch";
+import { CATEGORIES_TAG } from "@/features/products/utils/cache-tags";
 
 export const categoriesService = {
     // Fetch all categories
@@ -17,7 +18,7 @@ export const categoriesService = {
     },
     getAllCategoriesPublic: async (): Promise<Category[]> => {
         const data = await fetcher.get<{ categories: Category[] }>(QUERIES.public.categories.GET, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600, tags: [CATEGORIES_TAG] }
         });
         return data.categories;
     },

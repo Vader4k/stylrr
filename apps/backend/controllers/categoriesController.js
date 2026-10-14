@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Category } from "../models/category.model.js";
+import { CATEGORIES_TAG, PRODUCTS_TAG, revalidateStorefront } from "../utils/revalidate.js";
 
 export const getAllCategories = async (req, res) => {
     try {
@@ -141,6 +142,7 @@ export const addCategory = async (req, res) => {
         }
 
         const category = await Category.create({ name, slug, description, isActive, tags: tagIds });
+        revalidateStorefront([CATEGORIES_TAG]);
         res.status(201).json({
             success: true,
             message: "Category added successfully",
@@ -176,6 +178,8 @@ export const updateCategory = async (req, res) => {
         }
 
         const category = await Category.findByIdAndUpdate(req.params.id, { name, slug, description, isActive, tags: tagIds }, { new: true });
+        // product pages and listings show category names, so refresh product data too
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
             message: "Category updated successfully",
@@ -189,6 +193,7 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
             message: "Category deleted successfully",
@@ -202,6 +207,7 @@ export const deleteCategory = async (req, res) => {
 export const deleteCategoryTags = async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
+        revalidateStorefront([CATEGORIES_TAG, PRODUCTS_TAG]);
         res.status(200).json({
             success: true,
             message: "Category deleted successfully",
