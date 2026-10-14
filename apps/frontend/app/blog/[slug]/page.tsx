@@ -4,6 +4,31 @@ import { blogService } from "@/features/blogs/services/blog.service";
 import BlogFilters from "@/sections/blog/BlogFilters";
 import Image from "next/image";
 import BlogViewer from "@/features/blogs/components/BlogViewer";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const blogPost = await blogService.getBySlug(slug).catch(() => null);
+
+  if (!blogPost) {
+    return { title: "Post Not Found" };
+  }
+
+  return {
+    title: blogPost.title,
+    description: blogPost.intro,
+    alternates: {
+      canonical: `/blog/${blogPost.slug}`,
+    },
+    openGraph: {
+      type: "article",
+      url: `/blog/${blogPost.slug}`,
+      title: `${blogPost.title} | Stylr`,
+      description: blogPost.intro,
+      images: blogPost.image ? [{ url: blogPost.image, alt: blogPost.title }] : undefined,
+    },
+  };
+}
 
 const BlogDetails = async ({
   params,

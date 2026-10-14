@@ -5,6 +5,11 @@ import CategoryGrid from '@/sections/home/CategoryGrid'
 import Contact from '@/sections/home/Contact'
 import Hero from '@/sections/home/Hero'
 import News from '@/sections/home/News'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 const page = () => {
   return (

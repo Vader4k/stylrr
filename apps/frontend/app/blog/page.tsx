@@ -7,6 +7,7 @@ import { BlogPageProps } from '@/features/blogs/types/blog.types'
 export const metadata: Metadata = {
   title: "Fashion Blog & Styling Tips",
   description: "Stay updated with the latest fashion trends, styling tips, and industry news on the stylr blog.",
+  alternates: { canonical: "/blog" },
 }
 
 const BlogPage = async({ searchParams }: BlogPageProps) => {

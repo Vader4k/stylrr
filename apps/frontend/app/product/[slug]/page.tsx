@@ -7,6 +7,7 @@ import DetailsView from "@/sections/product/DetailsView"
 import RelatedProducts from "@/sections/product/RelatedProducts"
 import RecentlyViewedTracker from "@/features/recently-viewed/services/recently-viewed-tracker"
 import { Metadata } from "next"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -21,7 +22,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: product.name,
     description: product.shortDescription,
+    alternates: {
+      canonical: `/product/${product.slug}`,
+    },
     openGraph: {
+      url: `/product/${product.slug}`,
       title: `${product.name} | Stylr`,
       description: product.shortDescription,
       images: [
@@ -47,7 +52,7 @@ const ProductPage = async ({ params }: { params: Promise<{ slug: string }> }) =>
   const product = await productServices.getBySlug(slug).catch(() => undefined)
 
   if (!product) {
-    return <div>Product not found</div>
+    notFound()
   }
 
   const relatedProducts = await productServices.getRelated(product._id)
