@@ -9,12 +9,5 @@
   "devDependencies": {
     "turbo": "latest"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "bcrypt",
-      "msw",
-      "sharp"
-    ]
-  },
   "packageManager": "pnpm@9.0.0"
 }
