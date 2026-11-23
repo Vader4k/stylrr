@@ -78,7 +78,7 @@ export const footerLinks = {
         { name: "My Orders", href: '/cart' },
         { name: "My Wishlist", href: '/wishlist' },
         { name: "Account details", href: '/dashboard/account' },
-        { name: "Track My Order", href: '/track-order' }
+        { name: "Track My Order", href: '/order-tracking' }
     ],
     shop: [
         { name: "Affiliate", href: '#' },
