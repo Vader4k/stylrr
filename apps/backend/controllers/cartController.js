@@ -1,11 +1,23 @@
 import { Cart } from "../models/cart.model.js";
 
+// Build the lookup filter for the current requester. Never return a filter
+// with an undefined value: Mongoose strips undefined keys, which would turn
+// findOne({ cartId: undefined }) into findOne({}) and match someone else's cart.
+const cartFilter = (req) => {
+    if (req.user) return { user: req.user._id }
+    if (req.cartId) return { cartId: req.cartId }
+    return null
+}
+
+const findCart = (req) => {
+    const filter = cartFilter(req)
+    return filter ? Cart.findOne(filter) : null
+}
+
 export const addToCart = async (req, res) => {
     try {
         const { product, sku, quantity, size, color } = req.body;
-        let cart = req.user
-            ? await Cart.findOne({ user: req.user._id })
-            : await Cart.findOne({ cartId: req.cartId })
+        let cart = await findCart(req)
 
         //if no cart
         if (!cart) {
@@ -56,13 +68,10 @@ export const addToCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {
-        let cart
-
-        if (req.user) {
-            cart = await Cart.findOne({ user: req.user._id }).populate("items.product", "name images price discountPrice slug inventory")
-        } else {
-            cart = await Cart.findOne({ cartId: req.cartId }).populate("items.product", "name images price discountPrice slug inventory")
-        }
+        const filter = cartFilter(req)
+        const cart = filter
+            ? await Cart.findOne(filter).populate("items.product", "name images price discountPrice slug inventory")
+            : null
 
         if (!cart) {
             return res.status(200).json({
@@ -122,13 +131,7 @@ export const getCart = async (req, res) => {
 export const removeFromCart = async (req, res) => {
     try {
         const { itemId } = req.params
-        let cart
-
-        if (req.user) {
-            cart = await Cart.findOne({ user: req.user._id })
-        } else {
-            cart = await Cart.findOne({ cartId: req.cartId })
-        }
+        const cart = await findCart(req)
 
         if (!cart) {
             return res.status(404).json({
@@ -166,13 +169,7 @@ export const removeFromCart = async (req, res) => {
 
 export const resetCart = async (req, res, next) => {
     try {
-        let cart
-
-        if (req.user) {
-            cart = await Cart.findOne({ user: req.user._id })
-        } else {
-            cart = await Cart.findOne({ cartId: req.cartId })
-        }
+        const cart = await findCart(req)
 
         if (!cart) {
             return res.status(404).json({
