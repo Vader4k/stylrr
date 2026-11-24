@@ -2,7 +2,7 @@ import { DisplaySelectorProps } from './types/shop.types'
 import { LayoutGrid, List } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const DisplaySelector = ({ display, setDisplay, handleLimitChange, handleSortChange, limit, sort, totalProducts }: DisplaySelectorProps) => {
+const DisplaySelector = ({ display, setDisplay, handleLimitChange, handleSortChange, limit, sort, totalProducts, showingFrom, showingTo }: DisplaySelectorProps) => {
 
   return (
     <div className='hidden md:flex items-center justify-between'>

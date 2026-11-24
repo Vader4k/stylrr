@@ -100,7 +100,12 @@ export const getAllProductsPublic = async (req, res) => {
 
     // Filtering by colors (comma separated string)
     if (colors) {
-      query["colors.name"] = { $in: colors.split(",").map((c) => c.trim()) };
+      // case-insensitive: admins type color names freely ("Red"), the shop sends "red"
+      query["colors.name"] = {
+        $in: colors
+          .split(",")
+          .map((c) => new RegExp(`^${c.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i")),
+      };
     }
 
     // Filtering by category (comma separated string of NAMES)

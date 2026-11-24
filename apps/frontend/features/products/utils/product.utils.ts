@@ -4,6 +4,8 @@ export const progressValue = ({ inventory, sold }: { inventory: { size: string; 
   return (sold / inventory.reduce((acc, item) => acc + item.quantity, 0)) * 100
 }
 
+export const SHOP_LIMITS = [16, 24, 36]
+
 export const normalizeParams = (
   params: Record<string, string | string[] | undefined>
 ) => {
@@ -21,6 +23,12 @@ export const normalizeParams = (
       typeof params.page === "string" && !isNaN(Number(params.page))
         ? Number(params.page)
         : 1,
+
+    // only the page sizes the shop offers, so the URL can't request huge pages
+    limit:
+      typeof params.limit === "string" && SHOP_LIMITS.includes(Number(params.limit))
+        ? Number(params.limit)
+        : undefined,
 
     minPrice:
       typeof params.minPrice === "string"

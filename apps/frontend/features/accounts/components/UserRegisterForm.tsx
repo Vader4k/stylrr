@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { userRegisterSchema, UserRegisterSchemaType } from '../schema/accountSchema';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { authClientService } from '../../auth/services/auth.client.service';
+import { useRegister } from '@/features/auth/hooks/auth.hooks';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { errorHandler } from '@/lib/http/errorHandler';
@@ -15,6 +15,7 @@ import { errorHandler } from '@/lib/http/errorHandler';
 export default function UserRegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { mutateAsync: registerUser } = useRegister();
 
     const {
         register,
@@ -31,9 +32,10 @@ export default function UserRegisterForm() {
 
     const onSubmit = async (data: UserRegisterSchemaType) => {
         try {
-            const response = await authClientService.register(data);
+            const response = await registerUser(data);
             toast.success(response.message);
-            router.push('/account');
+            // replace: the register page shouldn't be in history once logged in
+            router.replace('/account');
         } catch (error) {
             toast.error(errorHandler(error));
         }
