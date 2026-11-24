@@ -1,8 +1,9 @@
 import { authClientService } from "../services/auth.client.service"
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { QUERIES } from "@/queries/queries"
 import { LoginSchemaType } from "@/schema/loginSchema"
 import { UserData, MeResponse, LoginResponse } from "../types/auth.types"
+import { UserRegisterSchemaType } from "@/features/accounts/schema/accountSchema"
 
 export const useLogin = () => {
     const queryClient = useQueryClient()
@@ -11,22 +12,24 @@ export const useLogin = () => {
             const response = await authClientService.login(data)
             return response
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERIES.ME] })
-        }
+        // Returning the promise makes mutateAsync wait until the session is
+        // refetched. Otherwise the guard on /account sees the cached guest
+        // `null` (from the Navbar's useMe) and bounces back to /account/login.
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: [QUERIES.ME], refetchType: "all" })
     })
 }
 
 export const useRegister = () => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: async (data: any) => {
+        mutationFn: async (data: UserRegisterSchemaType) => {
             const response = await authClientService.register(data)
             return response
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERIES.ME] })
-        }
+        // register also logs the user in; wait for the session like useLogin
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: [QUERIES.ME], refetchType: "all" })
     })
 }
 

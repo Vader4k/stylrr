@@ -16,6 +16,9 @@ const ProductView = ({ products, limit, totalProducts }: { products: ProductCard
   const updateParams = useUpdateParams()
 
   const sort = searchParams.get('sort') || 'newest'
+  const page = Number(searchParams.get('page')) || 1
+  const showingFrom = (page - 1) * limit + 1
+  const showingTo = showingFrom + products.length - 1
 
   const handleLimitChange = (value: string) => {
     updateParams({
@@ -38,6 +41,8 @@ const ProductView = ({ products, limit, totalProducts }: { products: ProductCard
         handleSortChange={handleSortChange}
         limit={limit.toString()}
         totalProducts={totalProducts}
+        showingFrom={showingFrom}
+        showingTo={showingTo}
         sort={sort}
       />
       <AnimatePresence mode="wait">

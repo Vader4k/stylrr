@@ -10,4 +10,6 @@ export type DisplaySelectorProps = {
     limit: string;
     sort: string;
     totalProducts: number;
+    showingFrom: number;
+    showingTo: number;
 };

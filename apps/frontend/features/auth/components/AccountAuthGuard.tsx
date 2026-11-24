@@ -6,17 +6,20 @@ import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
 
 const AccountAuthGuard = ({ children }: { children: React.ReactNode }) => {
-  const { data, isLoading } = useMe()
+  const { data, isLoading, isFetching } = useMe()
   const router = useRouter()
+  // A cached `null` (guest) can be refetching right after login; wait for it
+  // instead of treating the stale value as "logged out".
+  const isResolving = isLoading || (!data && isFetching)
 
   useEffect(() => {
-    if (!isLoading && !data) {
+    if (!isResolving && !data) {
       // replace (not push) so a stale token doesn't build a back-button loop
       router.replace("/account/login")
     }
-  }, [data, isLoading, router])
+  }, [data, isResolving, router])
 
-  if (isLoading) {
+  if (isResolving) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
