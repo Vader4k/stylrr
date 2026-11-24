@@ -7,14 +7,12 @@ import { userRegisterSchema, UserRegisterSchemaType } from '../schema/accountSch
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRegister } from '@/features/auth/hooks/auth.hooks';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { errorHandler } from '@/lib/http/errorHandler';
 
 
 export default function UserRegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
-    const router = useRouter();
     const { mutateAsync: registerUser } = useRegister();
 
     const {
@@ -35,7 +33,8 @@ export default function UserRegisterForm() {
             const response = await registerUser(data);
             toast.success(response.message);
             // replace: the register page shouldn't be in history once logged in
-            router.replace('/account');
+            // hard navigation to bypass a cached guest redirect (see UserLoginForm)
+            window.location.replace('/account');
         } catch (error) {
             toast.error(errorHandler(error));
         }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { User, Package, Settings, LogOut } from "lucide-react";
 import { useLogout } from "../../auth/hooks/auth.hooks";
 import { toast } from "sonner";
@@ -14,7 +14,6 @@ const navigation = [
 
 export default function AccountSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const { mutateAsync: logout, isPending: isLoggingOut } = useLogout();
 

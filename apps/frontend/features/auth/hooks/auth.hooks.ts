@@ -34,15 +34,15 @@ export const useRegister = () => {
 }
 
 export const useLogout = () => {
-    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async () => {
             const response = await authClientService.logout()
             return response
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [QUERIES.ME] })
-        }
+        // No ME invalidation here: refetching `me` while still on a guarded
+        // page makes the auth guard redirect to login before the caller's
+        // navigation lands. Callers do a full page load instead, which also
+        // resets the whole query cache.
     })
 }
 

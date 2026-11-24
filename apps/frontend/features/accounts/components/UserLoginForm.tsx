@@ -6,14 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { userLoginSchema, UserLoginSchemaType } from "../schema/accountSchema";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { errorHandler } from "@/lib/http/errorHandler";
 import { useLogin } from "@/features/auth/hooks/auth.hooks";
 
 export default function UserLoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
   const { mutateAsync: login, isPending } = useLogin();
 
   const {
@@ -32,7 +30,11 @@ export default function UserLoginForm() {
     try {
       const response = await login(data);
       toast.success(response.message);
-      router.replace("/account");
+      // Hard navigation, not router.replace: if /account was visited or
+      // prefetched while logged out, Next's client router cache holds the
+      // middleware's 307 back to /account/login and replays it without
+      // asking the server again. A full load sends the new cookie.
+      window.location.replace("/account");
     } catch (error) {
       toast.error(errorHandler(error));
     }

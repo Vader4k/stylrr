@@ -68,7 +68,10 @@ const Navbar = () => {
 
         {/* Desktop controls */}
         <div className="hidden xl:flex items-center gap-4">
-          <Link href={"/account"}>
+          {/* No prefetch: a guest prefetch gets the middleware's redirect to
+              /account/login cached, and that stale redirect is replayed when
+              the user navigates to /account right after logging in. */}
+          <Link href={"/account"} prefetch={false}>
             {user ? (
               <UserAvatar name={user.name} />
             ) : (

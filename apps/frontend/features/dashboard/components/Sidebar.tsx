@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import {
     Settings,
     LogOut
@@ -12,14 +12,15 @@ import { useLogout } from "@/features/auth/hooks/auth.hooks"
 
 export const Sidebar = () => {
     const pathname = usePathname()
-    const router = useRouter()
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
     const logout = useLogout()
 
     const handleLogout = () => {
         logout.mutate(undefined, {
+            // full load: avoids the AuthGuard racing us to /login and clears
+            // the cached session
             onSuccess: () => {
-                router.push("/")
+                window.location.replace("/")
             },
         })
     }
